@@ -23,7 +23,11 @@ function main() {
     let url = `https://swapi.co/api/films/${filmNumber}/`;
     let planets = [];
     let planetsInfos = [];
+    let mountains = "mountains";
     let completed_requests = 0;
+    let diameterAvailable = [];
+    let diameterFinal;
+    const reducer = (accumulator, currentValue) => accumulator + currentValue;
 
     return new Promise(resolve => {
         getData(url).then((result) => {
@@ -35,8 +39,11 @@ function main() {
                     completed_requests++;
                     if (completed_requests === planets.length) {
                         planetsInfos.forEach((element) => {
-                            if(element[3] === '1') {
-                                console.log(element);
+                            if(parseInt(element[3]) >= 1 && element[3] !== 'unknown') {
+                                if(element[2].toLowerCase().indexOf(mountains.toLowerCase()) !== -1) {
+                                    diameterAvailable = parseInt(element[1]);
+                                    console.log(diameterAvailable);
+                                }
                             }
                         });
                     }
