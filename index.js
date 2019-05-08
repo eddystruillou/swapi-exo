@@ -1,7 +1,7 @@
 const request = require("request");
 let filmNumber = 1;
 
-process.argv.forEach(function (val, index, array) {
+process.argv.forEach((val, index, array) => {
     filmNumber = val
 });
 
@@ -11,7 +11,7 @@ function getData(url) {
             if (err) {
                 reject(err);
             } else {
-                resolve(JSON.parse(body)); //JSON.parse possible crash ?
+                resolve(JSON.parse(body));
             }
         })
     })
@@ -19,37 +19,38 @@ function getData(url) {
 
 function main() {
     let url = `https://swapi.co/api/films/${filmNumber}/`;
-    let planets = [];
-    let planetsInfos = [];
     let mountains = "mountains";
-    let completed_requests = 0;
-    let diameterAvailable = [];
-    const reducer = (accumulator, currentValue) => accumulator + currentValue;
+    let planets = [];
+    let availableDiameter = [];
 
-    return new Promise(() => {
-        getData(url).then((result) => {
-            planets = result.planets;
-            url = planets[0];
-            return new Promise(() => {
-                for (let i in planets) {
-                    getData(planets[i]).then((result) => {
-                        planetsInfos.push({name: result.name, diameter: result.diameter, terrain: result.terrain, sw: result.surface_water});
-                        completed_requests++;
-                        if (completed_requests === planets.length) {
-                            planetsInfos.forEach((element) => {
-                                if(element.sw >= 1 && element.sw !== 'unknown') {
-                                    if(element.terrain.toLowerCase().indexOf(mountains.toLowerCase()) !== -1) {
-                                        diameterAvailable = element.diameter;
-                                        console.log(diameterAvailable);
-                                    }
-                                }
-                            });
-                        }
-                    });
+    return getData(url).then((result) => {
+        planets = result.planets;
+        result = []; //array<Promise>
+        for (let i in planets) {
+            result.push(getData(planets[i]))
+        }
+        return Promise.all(result)
+    }).catch((error) => {
+        console.log('error', error);
+    }).then((results) => {
+        results.forEach(({surface_water, diameter, terrain}) => {
+            if(surface_water >= 1 && surface_water !== 'unknown') {
+                if(terrain.toLowerCase().indexOf(mountains ) !== -1) {
+                    availableDiameter.push(diameter);
                 }
-            })
-        })
-    });
+            }
+        });
+
+        let som = 0;
+        for(let i in availableDiameter) {
+            som += parseInt(availableDiameter[i]);
+            console.log(som);
+            planets = [];
+            availableDiameter = [];
+        }
+    }).catch((error) => {
+        console.log('error', error);
+    })
 }
 
 main();
