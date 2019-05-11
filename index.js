@@ -1,9 +1,6 @@
 const request = require("request");
-let filmNumber = 1;
-
-process.argv.forEach((val, index, array) => {
-    filmNumber = val
-});
+const args = process.argv.slice(2);
+let filmNumber = args[0];
 
 function getData(url) {
     return new Promise((resolve, reject) => {
@@ -44,9 +41,11 @@ function main() {
         let som = 0;
         for(let i in availableDiameter) {
             som += parseInt(availableDiameter[i]);
-            console.log(som);
-            planets = [];
-            availableDiameter = [];
+        }
+        if(som !== 0) {
+            console.log('Total diameter :', som);
+        } else {
+            console.log('Recherche tu dois approfondir. Rien nous trouverons ici');
         }
     }).catch((error) => {
         console.log('error', error);
